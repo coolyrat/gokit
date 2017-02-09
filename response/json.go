@@ -5,11 +5,20 @@ import (
 	"net/http"
 )
 
-func RenderJson(w http.ResponseWriter, statusCode int, msg string, datas ...interface{}) {
+const (
+	Success = iota // 成功
+	PartSuccess // 部分成功
+	Fail // 失败
+)
+
+
+func RenderJson(w http.ResponseWriter, statusCode int, errors interface{}, datas ...interface{}) {
 	jsonHeader(w)
 	resp := map[string]interface{}{
 		"status":  statusCode,
-		"message": msg,
+	}
+	if errors != nil {
+		resp["errors"] = errors
 	}
 	// 是否有其他参数
 	if len(datas) > 0 && len(datas)%2 == 0 {
@@ -29,34 +38,37 @@ func RenderJson(w http.ResponseWriter, statusCode int, msg string, datas ...inte
 	}
 }
 
-// 200响应
+// 成功响应
 func JsonOk(w http.ResponseWriter, datas ...interface{}) {
-	RenderJson(w, http.StatusOK, http.StatusText(http.StatusOK), datas...)
+	RenderJson(w, Success, nil, datas...)
 }
 
-// 500响应
-func JsonErr(w http.ResponseWriter, datas ...interface{}) {
-	RenderJson(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError), datas...)
+// 错误响应
+func JsonErr(w http.ResponseWriter, errors interface{}, datas ...interface{}) {
+	RenderJson(w, Fail, errors, datas...)
 }
 
-// 500响应，带错误提示
-func JsonErrWithMsg(w http.ResponseWriter, msg string, datas ...interface{}) {
-	RenderJson(w, http.StatusInternalServerError, msg, datas...)
+// 错误响应
+func JsonPartSuccess(w http.ResponseWriter, errors interface{}, datas ...interface{}) {
+	RenderJson(w, PartSuccess, errors, datas...)
 }
 
-// 400响应
-func JsonBadRequest(w http.ResponseWriter, datas ...interface{}) {
-	RenderJson(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), datas...)
-}
-
-// 400响应，带错误提示
-func JsonBadRequestWithMsg(w http.ResponseWriter, msg string, datas ...interface{}) {
-	RenderJson(w, http.StatusBadRequest, msg, datas...)
-}
+//// 500响应，带错误提示
+//func JsonErrWithMsg(w http.ResponseWriter, msg string, datas ...interface{}) {
+//	RenderJson(w, http.StatusInternalServerError, msg, datas...)
+//}
+//
+//// 400响应
+//func JsonBadRequest(w http.ResponseWriter, datas ...interface{}) {
+//	RenderJson(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), datas...)
+//}
+//
+//// 400响应，带错误提示
+//func JsonBadRequestWithMsg(w http.ResponseWriter, msg string, datas ...interface{}) {
+//	RenderJson(w, http.StatusBadRequest, msg, datas...)
+//}
 
 // json响应头设置
 func jsonHeader(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
 }
-
-// 测试
