@@ -18,16 +18,13 @@ type Error struct {
 	Code    int `json:"code"`
 }
 
-func RenderJson(w http.ResponseWriter, statusCode int, msg string, errors []Error, datas ...interface{}) {
+func RenderJson(w http.ResponseWriter, statusCode int, errors []Error, datas ...interface{}) {
 	jsonHeader(w)
 	resp := map[string]interface{}{
 		"status":  statusCode,
 	}
 	if errors != nil && len(errors) > 0 {
 		resp["errors"] = errors
-	}
-	if msg != nil && len(msg) > 0 {
-		resp["reason"] = msg
 	}
 	// 是否有其他参数
 	if len(datas) > 0 && len(datas) % 2 == 0 {
