@@ -11,19 +11,28 @@ const (
 	Fail // 失败
 )
 
+type Error struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+	Index   int `json:"index"`
+	Code    int `json:"code"`
+}
 
-func RenderJson(w http.ResponseWriter, statusCode int, errors interface{}, datas ...interface{}) {
+func RenderJson(w http.ResponseWriter, statusCode int, msg string, errors []Error, datas ...interface{}) {
 	jsonHeader(w)
 	resp := map[string]interface{}{
 		"status":  statusCode,
 	}
-	if errors != nil {
+	if errors != nil && len(errors) > 0 {
 		resp["errors"] = errors
 	}
+	if msg != nil && len(msg) > 0 {
+		resp["reason"] = msg
+	}
 	// 是否有其他参数
-	if len(datas) > 0 && len(datas)%2 == 0 {
+	if len(datas) > 0 && len(datas) % 2 == 0 {
 		for i := 0; i < len(datas); i += 2 {
-			k, v := datas[i], datas[i+1]
+			k, v := datas[i], datas[i + 1]
 			if s, ok := k.(string); ok {
 				resp[s] = v
 			}
@@ -44,29 +53,14 @@ func JsonOk(w http.ResponseWriter, datas ...interface{}) {
 }
 
 // 错误响应
-func JsonErr(w http.ResponseWriter, errors interface{}, datas ...interface{}) {
+func JsonErr(w http.ResponseWriter, errors []Error, datas ...interface{}) {
 	RenderJson(w, Fail, errors, datas...)
 }
 
 // 错误响应
-func JsonPartSuccess(w http.ResponseWriter, errors interface{}, datas ...interface{}) {
+func JsonPartSuccess(w http.ResponseWriter, errors []Error, datas ...interface{}) {
 	RenderJson(w, PartSuccess, errors, datas...)
 }
-
-//// 500响应，带错误提示
-//func JsonErrWithMsg(w http.ResponseWriter, msg string, datas ...interface{}) {
-//	RenderJson(w, http.StatusInternalServerError, msg, datas...)
-//}
-//
-//// 400响应
-//func JsonBadRequest(w http.ResponseWriter, datas ...interface{}) {
-//	RenderJson(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest), datas...)
-//}
-//
-//// 400响应，带错误提示
-//func JsonBadRequestWithMsg(w http.ResponseWriter, msg string, datas ...interface{}) {
-//	RenderJson(w, http.StatusBadRequest, msg, datas...)
-//}
 
 // json响应头设置
 func jsonHeader(w http.ResponseWriter) {
