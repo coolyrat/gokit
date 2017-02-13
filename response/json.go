@@ -14,7 +14,7 @@ const (
 type Error struct {
 	Message string `json:"message,omitempty"`
 	Code    int `json:"code,omitempty"`
-	Field   int `json:"field,omitempty"`
+	Field   string `json:"field,omitempty"`
 	Data    interface{} `json:"data,omitempty"`
 }
 
