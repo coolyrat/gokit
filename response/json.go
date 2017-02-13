@@ -12,9 +12,9 @@ const (
 )
 
 type Error struct {
-	Message string `json:"message"`
-	Code    int `json:"code"`
-	Data    interface{} `json:"data"`
+	Message string `json:"message,omitempty"`
+	Code    int `json:"code,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 func RenderJson(w http.ResponseWriter, statusCode int, errors []Error, datas ...interface{}) {
